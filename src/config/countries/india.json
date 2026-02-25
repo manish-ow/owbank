@@ -1,0 +1,47 @@
+{
+  "country": "India",
+  "countryCode": "IN",
+  "currency": {
+    "code": "INR",
+    "symbol": "₹",
+    "name": "Indian Rupee",
+    "locale": "en-IN"
+  },
+  "welcomeBonus": 5000,
+  "accountPrefix": "OW",
+  "localIdCard": {
+    "name": "Aadhaar Card",
+    "placeholder": "XXXX XXXX XXXX",
+    "format": "#### #### ####",
+    "required": true
+  },
+  "phoneFormat": {
+    "prefix": "+91",
+    "placeholder": "98765 43210",
+    "maxLength": 11
+  },
+  "branding": {
+    "welcomeImage": "/images/welcome-india.jpg",
+    "tagline": "Aapka Digital Banking Partner",
+    "supportEmail": "support@owbank.in",
+    "supportPhone": "+91 1800 123 4567"
+  },
+  "features": {
+    "kafkaEnabled": true,
+    "aiChatEnabled": true,
+    "loansEnabled": true,
+    "cardsEnabled": true,
+    "internationalTransfers": false
+  },
+  "cardLimits": {
+    "standard": 100000,
+    "gold": 300000,
+    "platinum": 500000
+  },
+  "loanSettings": {
+    "maxAmount": 5000000,
+    "minAmount": 50000,
+    "maxTenureMonths": 84,
+    "minTenureMonths": 6
+  }
+}

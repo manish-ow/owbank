@@ -1,0 +1,47 @@
+{
+  "country": "Malaysia",
+  "countryCode": "MY",
+  "currency": {
+    "code": "MYR",
+    "symbol": "RM",
+    "name": "Malaysian Ringgit",
+    "locale": "ms-MY"
+  },
+  "welcomeBonus": 500,
+  "accountPrefix": "OW",
+  "localIdCard": {
+    "name": "MyKad (IC Number)",
+    "placeholder": "XXXXXX-XX-XXXX",
+    "format": "######-##-####",
+    "required": true
+  },
+  "phoneFormat": {
+    "prefix": "+60",
+    "placeholder": "12-345 6789",
+    "maxLength": 12
+  },
+  "branding": {
+    "welcomeImage": "/images/welcome-malaysia.jpg",
+    "tagline": "Perbankan Digital untuk Semua",
+    "supportEmail": "support@owbank.my",
+    "supportPhone": "+60 3-1234 5678"
+  },
+  "features": {
+    "kafkaEnabled": true,
+    "aiChatEnabled": true,
+    "loansEnabled": true,
+    "cardsEnabled": true,
+    "internationalTransfers": false
+  },
+  "cardLimits": {
+    "standard": 5000,
+    "gold": 15000,
+    "platinum": 30000
+  },
+  "loanSettings": {
+    "maxAmount": 500000,
+    "minAmount": 5000,
+    "maxTenureMonths": 120,
+    "minTenureMonths": 12
+  }
+}

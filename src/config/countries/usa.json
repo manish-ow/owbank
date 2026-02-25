@@ -1,0 +1,47 @@
+{
+  "country": "USA",
+  "countryCode": "US",
+  "currency": {
+    "code": "USD",
+    "symbol": "$",
+    "name": "US Dollar",
+    "locale": "en-US"
+  },
+  "welcomeBonus": 1000,
+  "accountPrefix": "OW",
+  "localIdCard": {
+    "name": "Social Security Number (SSN)",
+    "placeholder": "XXX-XX-XXXX",
+    "format": "###-##-####",
+    "required": false
+  },
+  "phoneFormat": {
+    "prefix": "+1",
+    "placeholder": "(555) 123-4567",
+    "maxLength": 14
+  },
+  "branding": {
+    "welcomeImage": "/images/welcome-usa.jpg",
+    "tagline": "Your Trusted Digital Bank in the USA",
+    "supportEmail": "support@owbank.us",
+    "supportPhone": "+1 (800) 123-4567"
+  },
+  "features": {
+    "kafkaEnabled": true,
+    "aiChatEnabled": true,
+    "loansEnabled": true,
+    "cardsEnabled": true,
+    "internationalTransfers": false
+  },
+  "cardLimits": {
+    "standard": 5000,
+    "gold": 15000,
+    "platinum": 25000
+  },
+  "loanSettings": {
+    "maxAmount": 100000,
+    "minAmount": 1000,
+    "maxTenureMonths": 60,
+    "minTenureMonths": 6
+  }
+}

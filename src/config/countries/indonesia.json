@@ -1,0 +1,47 @@
+{
+  "country": "Indonesia",
+  "countryCode": "ID",
+  "currency": {
+    "code": "IDR",
+    "symbol": "Rp",
+    "name": "Indonesian Rupiah",
+    "locale": "id-ID"
+  },
+  "welcomeBonus": 1000000,
+  "accountPrefix": "OW",
+  "localIdCard": {
+    "name": "KTP (Kartu Tanda Penduduk)",
+    "placeholder": "3201XXXXXXXXXXXX",
+    "format": "################",
+    "required": true
+  },
+  "phoneFormat": {
+    "prefix": "+62",
+    "placeholder": "812-3456-7890",
+    "maxLength": 13
+  },
+  "branding": {
+    "welcomeImage": "/images/welcome-indonesia.jpg",
+    "tagline": "Perbankan Digital untuk Indonesia",
+    "supportEmail": "support@owbank.id",
+    "supportPhone": "+62 21 1234 5678"
+  },
+  "features": {
+    "kafkaEnabled": true,
+    "aiChatEnabled": true,
+    "loansEnabled": true,
+    "cardsEnabled": true,
+    "internationalTransfers": false
+  },
+  "cardLimits": {
+    "standard": 10000000,
+    "gold": 25000000,
+    "platinum": 50000000
+  },
+  "loanSettings": {
+    "maxAmount": 500000000,
+    "minAmount": 5000000,
+    "maxTenureMonths": 60,
+    "minTenureMonths": 6
+  }
+}

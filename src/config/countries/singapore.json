@@ -1,0 +1,47 @@
+{
+  "country": "Singapore",
+  "countryCode": "SG",
+  "currency": {
+    "code": "SGD",
+    "symbol": "S$",
+    "name": "Singapore Dollar",
+    "locale": "en-SG"
+  },
+  "welcomeBonus": 1500,
+  "accountPrefix": "OW",
+  "localIdCard": {
+    "name": "NRIC / FIN",
+    "placeholder": "S1234567D",
+    "format": "AXXXXXXXA",
+    "required": true
+  },
+  "phoneFormat": {
+    "prefix": "+65",
+    "placeholder": "9123 4567",
+    "maxLength": 9
+  },
+  "branding": {
+    "welcomeImage": "/images/welcome-singapore.jpg",
+    "tagline": "Smart Banking for the Lion City",
+    "supportEmail": "support@owbank.sg",
+    "supportPhone": "+65 6123 4567"
+  },
+  "features": {
+    "kafkaEnabled": true,
+    "aiChatEnabled": true,
+    "loansEnabled": true,
+    "cardsEnabled": true,
+    "internationalTransfers": true
+  },
+  "cardLimits": {
+    "standard": 8000,
+    "gold": 20000,
+    "platinum": 50000
+  },
+  "loanSettings": {
+    "maxAmount": 200000,
+    "minAmount": 2000,
+    "maxTenureMonths": 84,
+    "minTenureMonths": 6
+  }
+}

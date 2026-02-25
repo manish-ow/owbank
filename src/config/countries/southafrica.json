@@ -1,0 +1,47 @@
+{
+    "country": "South Africa",
+    "countryCode": "ZA",
+    "currency": {
+        "code": "ZAR",
+        "symbol": "R",
+        "name": "South African Rand",
+        "locale": "en-ZA"
+    },
+    "welcomeBonus": 1000,
+    "accountPrefix": "NED",
+    "localIdCard": {
+        "name": "South African ID Card",
+        "placeholder": "XXXX XXX XXX XXX",
+        "format": "#### #### ####",
+        "required": true
+    },
+    "phoneFormat": {
+        "prefix": "+27",
+        "placeholder": "82 123 4567",
+        "maxLength": 10
+    },
+    "branding": {
+        "welcomeImage": "/images/welcome-southafrica.jpg",
+        "tagline": "Your Digital Banking Partner",
+        "supportEmail": "[EMAIL_ADDRESS]",
+        "supportPhone": "+27 10 123 4567"
+    },
+    "features": {
+        "kafkaEnabled": true,
+        "aiChatEnabled": true,
+        "loansEnabled": true,
+        "cardsEnabled": true,
+        "internationalTransfers": true
+    },
+    "cardLimits": {
+        "standard": 50000,
+        "gold": 150000,
+        "platinum": 300000
+    },
+    "loanSettings": {
+        "maxAmount": 1000000,
+        "minAmount": 10000,
+        "maxTenureMonths": 60,
+        "minTenureMonths": 6
+    }
+}
