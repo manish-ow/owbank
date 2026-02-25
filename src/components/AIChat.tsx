@@ -107,7 +107,11 @@ export default function AIChat() {
         setIsListening(false);
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (event: any) => {
+        // Surface permission errors on mobile
+        if (event.error === 'not-allowed') {
+          console.warn('Microphone permission denied');
+        }
         setIsListening(false);
       };
 
@@ -153,19 +157,33 @@ export default function AIChat() {
     setAttachedImage(null);
   }, []);
 
-  const toggleVoice = useCallback(() => {
+  const toggleVoice = useCallback(async () => {
     if (!recognitionRef.current) return;
 
     if (isListening) {
-      recognitionRef.current.stop();
+      recognitionRef.current.abort();
       setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch {
-        setIsListening(false);
+      return;
+    }
+
+    // Mobile browsers require explicit mic permission before SpeechRecognition works.
+    // getUserMedia triggers the native permission prompt on iOS/Android.
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Immediately release the mic — we only needed the permission grant
+        stream.getTracks().forEach((track) => track.stop());
       }
+    } catch {
+      // Permission denied or getUserMedia not available — still try recognition
+      console.warn('getUserMedia failed, trying SpeechRecognition directly');
+    }
+
+    try {
+      recognitionRef.current.start();
+      setIsListening(true);
+    } catch {
+      setIsListening(false);
     }
   }, [isListening]);
 
