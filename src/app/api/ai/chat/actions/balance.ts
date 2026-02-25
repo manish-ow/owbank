@@ -4,6 +4,7 @@
  */
 
 import Account from '@/models/Account';
+import Loan from '@/models/Loan';
 import { connectToDatabase } from '@/lib/mongodb';
 import { getCountryConfig } from '@/config';
 import type { ActionResult } from '@/lib/types';
@@ -29,8 +30,13 @@ export async function handleGetBalance(
 }
 
 /** Handle GET_CREDIT_SCORE action. */
-export async function handleGetCreditScore(): Promise<ActionResult> {
-    const score = Math.floor(650 + Math.random() * 200);
+export async function handleGetCreditScore(_action: Record<string, unknown>, _userId: string, accountNumber: string): Promise<ActionResult> {
+    await connectToDatabase();
+
+    // Query stored credit score from previous loans first
+    const existingLoan = await Loan.findOne({ accountNumber }).sort({ createdAt: -1 });
+    const score = existingLoan?.creditScore || Math.floor(650 + Math.random() * 200);
+
     let rating = 'Fair';
     if (score >= 800) rating = 'Excellent';
     else if (score >= 720) rating = 'Good';

@@ -80,70 +80,68 @@ export async function transfer(req: NextRequest): Promise<NextResponse> {
 
         const reference = generateReference();
 
-        try {
-            await publishTransactionEvent({
-                type: 'TRANSFER_INITIATED',
-                fromAccount: senderAccount.accountNumber,
-                toAccount,
-                amount,
-                reference,
-                timestamp: new Date().toISOString(),
-            });
-        } catch (kafkaError) {
-            log.warn('Kafka publish failed (continuing)', { reference, error: (kafkaError as Error).message });
-        }
+        // Perform the heavy lifting in the background
+        (async () => {
+            const dbSession = await mongoose.startSession();
+            dbSession.startTransaction();
+            try {
+                // 1. Publish initiation (ignore failure)
+                try {
+                    await publishTransactionEvent({
+                        type: 'TRANSFER_INITIATED',
+                        fromAccount: senderAccount.accountNumber,
+                        toAccount,
+                        amount,
+                        reference,
+                        timestamp: new Date().toISOString(),
+                    });
+                } catch (k) { /* ignore */ }
 
-        const dbSession = await mongoose.startSession();
-        dbSession.startTransaction();
-        try {
-            senderAccount.balance -= amount;
-            recipientAccount.balance += amount;
-            await senderAccount.save({ session: dbSession });
-            await recipientAccount.save({ session: dbSession });
-            await dbSession.commitTransaction();
-        } catch (txError) {
-            await dbSession.abortTransaction();
-            throw txError;
-        } finally {
-            dbSession.endSession();
-        }
+                // 2. Atomic balance update
+                senderAccount.balance -= amount;
+                recipientAccount.balance += amount;
+                await senderAccount.save({ session: dbSession });
+                await recipientAccount.save({ session: dbSession });
 
-        const transaction = await Transaction.create({
-            reference,
-            fromAccount: senderAccount.accountNumber,
-            toAccount,
-            amount,
-            type: 'transfer',
-            status: 'completed',
-            description: description || `Transfer to ${toAccount}`,
-        });
+                // 3. Create transaction record
+                const transaction = await Transaction.create([{
+                    reference,
+                    fromAccount: senderAccount.accountNumber,
+                    toAccount,
+                    amount,
+                    type: 'transfer',
+                    status: 'completed',
+                    description: description || `Transfer to ${toAccount}`,
+                }], { session: dbSession });
 
-        try {
-            await publishTransactionEvent({
-                type: 'TRANSFER_COMPLETED',
-                fromAccount: senderAccount.accountNumber,
-                toAccount,
-                amount,
-                reference,
-                timestamp: new Date().toISOString(),
-            });
-        } catch (kafkaError) {
-            log.warn('Kafka completion publish failed', { reference, error: (kafkaError as Error).message });
-        }
+                await dbSession.commitTransaction();
 
-        log.info('Transfer completed', { reference, from: senderAccount.accountNumber, to: toAccount, amount });
+                // 4. Publish completion
+                try {
+                    await publishTransactionEvent({
+                        type: 'TRANSFER_COMPLETED',
+                        fromAccount: senderAccount.accountNumber,
+                        toAccount,
+                        amount,
+                        reference,
+                        timestamp: new Date().toISOString(),
+                    });
+                } catch (k) { /* ignore */ }
+
+                log.info('Background transfer completed', { reference, from: senderAccount.accountNumber, to: toAccount });
+            } catch (txError) {
+                await dbSession.abortTransaction();
+                log.error('Background transfer failed', { reference, error: (txError as Error).message });
+            } finally {
+                dbSession.endSession();
+            }
+        })();
 
         return NextResponse.json({
             success: true,
-            transaction: {
-                reference: transaction.reference,
-                amount: transaction.amount,
-                toAccount: transaction.toAccount,
-                status: transaction.status,
-                createdAt: transaction.createdAt,
-            },
-            newBalance: senderAccount.balance,
-            message: `Successfully transferred $${amount.toFixed(2)} to ${toAccount}`,
+            status: 'submitted',
+            reference,
+            message: `Bank transfer of $${amount.toFixed(2)} to ${toAccount} submitted successfully.`,
         });
     } catch (error: unknown) {
         if (error instanceof AuthError) return error.response;

@@ -133,12 +133,13 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
 
     // ─── Transfer Journey ──────────────────────
 
-    // Transfer amount question
+    // Transfer amount question (only when AI is asking)
     {
         test: (l) =>
-            (l.includes('how much') || l.includes('amount')) &&
+            (l.includes('how much') || (l.includes('amount') && l.includes('?'))) &&
             (l.includes('transfer') || l.includes('send')) &&
-            !l.includes('loan') && !l.includes('borrow'),
+            !l.includes('loan') && !l.includes('borrow') &&
+            !l.includes('submitted') && !l.includes('completed') && !l.includes('success'),
         actions: () => {
             const sym = getCountryConfig().currency.symbol;
             return [

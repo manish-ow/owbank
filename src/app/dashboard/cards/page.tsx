@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme';
+import countryConfig, { formatCurrency } from '@/config';
+import { useToast } from '@/hooks/useToast';
 
 export default function CardsPage() {
   const [cards, setCards] = useState<any[]>([]);
@@ -11,11 +13,12 @@ export default function CardsPage() {
   const [showApply, setShowApply] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
+  const toast = useToast();
 
   const cardTypes = [
-    { type: 'standard', name: t('cards', 'standard'), limit: '$5,000', color: 'from-gray-700 to-gray-900', fee: t('cards', 'free') },
-    { type: 'gold', name: t('cards', 'gold'), limit: '$15,000', color: 'from-yellow-600 to-yellow-800', fee: '$49/yr' },
-    { type: 'platinum', name: t('cards', 'platinum'), limit: '$25,000', color: 'from-gray-800 to-gray-950', fee: '$99/yr' },
+    { type: 'standard', name: t('cards', 'standard'), limit: formatCurrency(countryConfig.cardLimits.standard), color: 'from-gray-700 to-gray-900', fee: t('cards', 'free') },
+    { type: 'gold', name: t('cards', 'gold'), limit: formatCurrency(countryConfig.cardLimits.gold), color: 'from-yellow-600 to-yellow-800', fee: '$49/yr' },
+    { type: 'platinum', name: t('cards', 'platinum'), limit: formatCurrency(countryConfig.cardLimits.platinum), color: 'from-gray-800 to-gray-950', fee: '$99/yr' },
   ];
 
   useEffect(() => {
@@ -39,14 +42,14 @@ export default function CardsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message);
+        toast.success(data.message);
         fetchCards();
         setShowApply(false);
       } else {
-        alert(data.error);
+        toast.error(data.error);
       }
     } catch (err) {
-      alert('Failed to apply for card');
+      toast.error('Failed to apply for card');
     } finally {
       setApplying(false);
     }
@@ -57,10 +60,11 @@ export default function CardsPage() {
       const res = await fetch(`/api/cards/${cardId}/freeze`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
+        toast.success(data.message || 'Card status updated');
         fetchCards();
       }
     } catch (err) {
-      alert('Failed to update card');
+      toast.error('Failed to update card');
     }
   };
 
@@ -119,11 +123,11 @@ export default function CardsPage() {
                 <div className="flex justify-between items-center mb-3">
                   <div>
                     <p className="text-xs text-gray-400">{t('cards', 'creditLimit')}</p>
-                    <p className="text-sm font-bold text-gray-700">${card.creditLimit.toLocaleString()}</p>
+                    <p className="text-sm font-bold text-gray-700">{formatCurrency(card.creditLimit)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">{t('cards', 'used')}</p>
-                    <p className="text-sm font-bold text-gray-700">${card.usedCredit.toLocaleString()}</p>
+                    <p className="text-sm font-bold text-gray-700">{formatCurrency(card.usedCredit)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-400">{t('cards', 'rewards')}</p>

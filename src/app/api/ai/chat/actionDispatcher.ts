@@ -5,7 +5,7 @@
 
 import { handleGetBalance, handleGetCreditScore } from './actions/balance';
 import { handleGetTransactions } from './actions/transactions';
-import { handleTransfer } from './actions/transfer';
+import { handleTransferInitiate, handleTransferConfirm } from './actions/transfer';
 import { handleCardCheckEligibility, handleApplyCreditCard } from './actions/cards';
 import { handleLoanCheckCreditScore, handleLoanConfirm } from './actions/loans';
 import logger from '@/lib/logger';
@@ -27,12 +27,14 @@ export async function executeAction(
     switch (actionType) {
         case 'GET_BALANCE': return handleGetBalance(action, userId, accountNumber);
         case 'GET_TRANSACTIONS': return handleGetTransactions(action, userId, accountNumber);
-        case 'TRANSFER': return handleTransfer(action, userId, accountNumber);
+        case 'TRANSFER_INITIATE': return handleTransferInitiate(action, userId, accountNumber);
+        case 'TRANSFER_CONFIRM': return handleTransferConfirm(action, userId, accountNumber);
+        case 'TRANSFER': return handleTransferInitiate(action, userId, accountNumber); // Fallback for old action type
         case 'CARD_CHECK_ELIGIBILITY': return handleCardCheckEligibility(action);
         case 'APPLY_CREDIT_CARD': return handleApplyCreditCard(action, userId, accountNumber);
-        case 'LOAN_CHECK_CREDIT_SCORE': return handleLoanCheckCreditScore(action);
+        case 'LOAN_CHECK_CREDIT_SCORE': return handleLoanCheckCreditScore(action, userId, accountNumber);
         case 'LOAN_CONFIRM': return handleLoanConfirm(action, userId, accountNumber);
-        case 'GET_CREDIT_SCORE': return handleGetCreditScore();
+        case 'GET_CREDIT_SCORE': return handleGetCreditScore(action, userId, accountNumber);
         default:
             log.warn('Unknown action type', { actionType });
             return { text: 'I could not process that action. Please try again.', type: 'error' };

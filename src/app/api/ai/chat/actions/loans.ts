@@ -15,7 +15,8 @@ import type { ActionResult } from '@/lib/types';
 const log = logger.child({ module: 'loanAction' });
 
 /** Handle LOAN_CHECK_CREDIT_SCORE action. */
-export async function handleLoanCheckCreditScore(action: Record<string, unknown>): Promise<ActionResult> {
+export async function handleLoanCheckCreditScore(action: Record<string, unknown>, userId: string, accountNumber: string): Promise<ActionResult> {
+    await connectToDatabase();
     const config = getCountryConfig();
     const sym = config.currency.symbol;
     const params = (action.params as Record<string, unknown>) || {};
@@ -29,7 +30,9 @@ export async function handleLoanCheckCreditScore(action: Record<string, unknown>
         return { text: `Loan amount must be between ${sym}${config.loanSettings.minAmount.toLocaleString()} and ${sym}${config.loanSettings.maxAmount.toLocaleString()}.`, type: 'error' };
     }
 
-    const score = Math.floor(650 + Math.random() * 200);
+    // Query stored credit score from previous loans first
+    const existingLoan = await Loan.findOne({ accountNumber }).sort({ createdAt: -1 });
+    const score = existingLoan?.creditScore || Math.floor(650 + Math.random() * 200);
     let rating = 'Fair';
     if (score >= 800) rating = 'Excellent';
     else if (score >= 720) rating = 'Good';

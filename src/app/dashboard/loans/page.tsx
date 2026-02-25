@@ -56,6 +56,8 @@ export default function LoansPage() {
       setResult(data);
       if (data.success) {
         fetchLoans();
+        setForm({ amount: '', tenure: '12', purpose: '', creditScore: 750 });
+        setShowApply(false);
       }
     } catch (err) {
       setResult({ error: 'Failed to apply for loan' });
@@ -139,7 +141,10 @@ export default function LoansPage() {
                 min="1000"
                 max="100000"
                 value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, amount: e.target.value });
+                  setResult(null);
+                }}
                 placeholder="5000"
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               />
@@ -148,7 +153,10 @@ export default function LoansPage() {
               <label className="block text-sm font-medium text-gray-600 mb-1">{t('loans', 'tenureMonths')}</label>
               <select
                 value={form.tenure}
-                onChange={(e) => setForm({ ...form, tenure: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, tenure: e.target.value });
+                  setResult(null);
+                }}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               >
                 {[6, 12, 24, 36, 48, 60].map((m) => (
@@ -162,7 +170,10 @@ export default function LoansPage() {
                 type="text"
                 required
                 value={form.purpose}
-                onChange={(e) => setForm({ ...form, purpose: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, purpose: e.target.value });
+                  setResult(null);
+                }}
                 placeholder={t('loans', 'purposePlaceholder')}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               />
@@ -174,7 +185,10 @@ export default function LoansPage() {
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setForm({ ...form, creditScore: opt.value })}
+                    onClick={() => {
+                      setForm({ ...form, creditScore: opt.value });
+                      setResult(null);
+                    }}
                     className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
                       form.creditScore === opt.value
                         ? 'border-cyan bg-blue-50'

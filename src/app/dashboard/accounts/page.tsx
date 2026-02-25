@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme';
+import { formatCurrency } from '@/config';
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
@@ -43,7 +44,7 @@ export default function AccountsPage() {
                 </span>
               </div>
               <p className="text-3xl font-bold mb-1">
-                ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                {formatCurrency(acc.balance)}
               </p>
               <p className="text-sm opacity-70">{acc.accountNumber}</p>
             </div>

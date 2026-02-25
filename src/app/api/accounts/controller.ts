@@ -14,6 +14,7 @@ import { connectToDatabase } from '@/lib/mongodb';
 import Account from '@/models/Account';
 import Transaction from '@/models/Transaction';
 import { generateReference } from '@/lib/helpers';
+import { formatCurrency } from '@/config';
 import logger from '@/lib/logger';
 
 const log = logger.child({ module: 'accountsController' });
@@ -120,7 +121,7 @@ export async function openAccount(req: NextRequest): Promise<NextResponse> {
                 balance: account.balance,
                 fullName: account.fullName,
             },
-            message: 'Account opened successfully! $1,000 welcome bonus credited.',
+            message: `Account opened successfully! ${formatCurrency(1000)} welcome bonus credited.`,
         });
     } catch (error: unknown) {
         if (error instanceof AuthError) return error.response;

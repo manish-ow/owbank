@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme';
+import { formatCurrency } from '@/config';
 
 export default function TransfersPage() {
   const [form, setForm] = useState({ toAccount: '', amount: '', description: '' });
@@ -73,7 +74,10 @@ export default function TransfersPage() {
                 type="text"
                 required
                 value={form.toAccount}
-                onChange={(e) => setForm({ ...form, toAccount: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, toAccount: e.target.value });
+                  setResult(null);
+                }}
                 placeholder={t('transfers', 'recipientPlaceholder')}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               />
@@ -86,7 +90,10 @@ export default function TransfersPage() {
                 min="0.01"
                 step="0.01"
                 value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, amount: e.target.value });
+                  setResult(null);
+                }}
                 placeholder={t('transfers', 'amountPlaceholder')}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               />
@@ -96,7 +103,10 @@ export default function TransfersPage() {
               <input
                 type="text"
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, description: e.target.value });
+                  setResult(null);
+                }}
                 placeholder={t('transfers', 'descPlaceholder')}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               />
@@ -119,7 +129,7 @@ export default function TransfersPage() {
                 <div>
                   <p className="font-medium text-green-700">{result.message}</p>
                   <p className="text-sm text-green-600 mt-1">{t('transfers', 'ref')}: {result.transaction?.reference}</p>
-                  <p className="text-sm text-green-600">{t('transfers', 'newBalance')}: ${result.newBalance?.toFixed(2)}</p>
+                  <p className="text-sm text-green-600">{t('transfers', 'newBalance')}: {formatCurrency(result.newBalance || 0)}</p>
                 </div>
               ) : (
                 <p className="font-medium text-red-700">{result.error}</p>
@@ -156,7 +166,7 @@ export default function TransfersPage() {
                   </div>
                   <span className={`text-sm font-semibold ${tx.type === 'bonus' || tx.toAccount === myAccount ? 'text-green-600' : 'text-red-600'
                     }`}>
-                    {tx.type === 'bonus' || tx.toAccount === myAccount ? '+' : '-'}${tx.amount.toFixed(2)}
+                    {tx.type === 'bonus' || tx.toAccount === myAccount ? '+' : '-'}{formatCurrency(tx.amount)}
                   </span>
                 </div>
               ))}

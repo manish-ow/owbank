@@ -101,7 +101,9 @@ export async function handleChatRequest(req: NextRequest): Promise<NextResponse>
             const result = await executeAction(action, user._id.toString(), account.accountNumber);
             actionType = result.type;
             actionData = (result.data as Record<string, unknown>) || null;
-            const isHallucinated = conversationalText.length > 200 && (conversationalText.includes('Date:') || conversationalText.includes('Amount:'));
+            // Improved hallucination detection - check for fake transaction patterns
+            const isHallucinated = conversationalText.length > 200 &&
+                /(?:Date|Time|Reference|Amount|Status|Balance|Transaction):\s*[\w\d\s,.-]+/i.test(conversationalText);
             const cleanConvo = isHallucinated ? '' : conversationalText;
             finalResponse = cleanConvo ? `${cleanConvo}\n\n${result.text}` : result.text;
         } else {

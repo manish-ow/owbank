@@ -90,7 +90,7 @@ export default function StandardDashboard() {
           <StatCard
             title={t('dashboard', 'creditCardDue')}
             value={formatCurrency(primaryCard.usedCredit || 0)}
-            subtitle={`+12% ${t('dashboard', 'fromLastMonth')}`}
+            subtitle={primaryCard.usedCredit > 0 ? `+12% ${t('dashboard', 'fromLastMonth')}` : t('dashboard', 'noBalanceDue')}
             icon="↗"
             color={theme.accentColor}
           />

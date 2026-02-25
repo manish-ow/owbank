@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { getCountryConfig } from '@/config';
 
 export function generateReference(): string {
   return `TXN-${uuidv4().slice(0, 8).toUpperCase()}`;
@@ -41,19 +42,13 @@ export function getInterestRate(creditScore: number): number {
 }
 
 export function getCreditLimit(cardType: string): number {
+  const config = getCountryConfig();
   switch (cardType) {
-    case 'platinum': return 25000;
-    case 'gold': return 15000;
-    case 'standard': return 5000;
-    default: return 5000;
+    case 'platinum': return config.cardLimits.platinum;
+    case 'gold': return config.cardLimits.gold;
+    case 'standard': return config.cardLimits.standard;
+    default: return config.cardLimits.standard;
   }
-}
-
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
 }
 
 export function maskCardNumber(cardNumber: string): string {
