@@ -78,6 +78,14 @@ export function getAllCountries(): { key: string; name: string; code: string }[]
   }));
 }
 
+export function getAllCurrencies(): { code: string; symbol: string; name: string }[] {
+  const currencyMap = new Map<string, { code: string; symbol: string; name: string }>();
+  Object.values(configs).forEach(config => {
+    currencyMap.set(config.currency.code, config.currency);
+  });
+  return Array.from(currencyMap.values());
+}
+
 export function formatCurrency(amount: number, country?: string): string {
   const config = getCountryConfig(country);
   return `${config.currency.symbol}${amount.toLocaleString(config.currency.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;

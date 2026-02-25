@@ -21,13 +21,15 @@ interface ActionResult {
 
 async function executeAction(action: any, userId: string, accountNumber: string): Promise<ActionResult> {
   await connectToDatabase();
+  const config = getCountryConfig();
+  const sym = config.currency.symbol;
 
   switch (action.action) {
     case 'GET_BALANCE': {
       const account = await Account.findOne({ accountNumber });
       if (!account) return { text: 'Account not found.', type: 'error' };
       return {
-        text: `Your **${account.accountType}** account (**${account.accountNumber}**) has a balance of **$${account.balance.toFixed(2)}**.`,
+        text: `Your **${account.accountType}** account (**${account.accountNumber}**) has a balance of **${sym}${account.balance.toFixed(2)}**.`,
         type: 'balance',
         data: { balance: account.balance, accountNumber: account.accountNumber, accountType: account.accountType },
       };
@@ -46,7 +48,7 @@ async function executeAction(action: any, userId: string, accountNumber: string)
       const txList = transactions.map((t) => {
         const isSender = t.fromAccount === accountNumber;
         const sign = t.type === 'bonus' || !isSender ? '+' : '-';
-        return `- ${sign}$${t.amount.toFixed(2)} — ${t.description} (${new Date(t.createdAt).toLocaleDateString()})`;
+        return `- ${sign}${sym}${t.amount.toFixed(2)} — ${t.description} (${new Date(t.createdAt).toLocaleDateString()})`;
       });
       return { text: `Here are your recent transactions:\n\n${txList.join('\n')}`, type: 'transactions', data: { count: transactions.length } };
     }
@@ -57,7 +59,7 @@ async function executeAction(action: any, userId: string, accountNumber: string)
 
       const senderAccount = await Account.findOne({ accountNumber });
       if (!senderAccount) return { text: 'Your account was not found.', type: 'error' };
-      if (senderAccount.balance < amount) return { text: `Insufficient balance. Your current balance is **$${senderAccount.balance.toFixed(2)}**.`, type: 'error' };
+      if (senderAccount.balance < amount) return { text: `Insufficient balance. Your current balance is **${sym}${senderAccount.balance.toFixed(2)}**.`, type: 'error' };
       if (toAccount === accountNumber) return { text: 'You cannot transfer to your own account.', type: 'error' };
 
       const recipientAccount = await Account.findOne({ accountNumber: toAccount });
@@ -94,18 +96,16 @@ async function executeAction(action: any, userId: string, accountNumber: string)
       });
 
       return {
-        text: `Transfer successful!\n\n- **Amount:** $${amount.toFixed(2)}\n- **To:** ${toAccount}\n- **Reference:** ${reference}\n- **New Balance:** $${senderAccount.balance.toFixed(2)}`,
+        text: `Transfer successful!\n\n- **Amount:** ${sym}${amount.toFixed(2)}\n- **To:** ${toAccount}\n- **Reference:** ${reference}\n- **New Balance:** ${sym}${senderAccount.balance.toFixed(2)}`,
         type: 'transfer_success',
         data: { amount, toAccount, reference, newBalance: senderAccount.balance },
       };
     }
 
     case 'CARD_CHECK_ELIGIBILITY': {
-      const config = getCountryConfig();
       const { employment, income } = action.params || {};
       const annualIncome = Number(income) || 0;
       const cards: { type: string; limit: number; eligible: boolean; recommended: boolean }[] = [];
-      const sym = config.currency.symbol;
 
       // Determine eligibility based on income
       cards.push({
@@ -140,8 +140,6 @@ async function executeAction(action: any, userId: string, accountNumber: string)
     }
 
     case 'APPLY_CREDIT_CARD': {
-      const config = getCountryConfig();
-      const sym = config.currency.symbol;
       const { cardType, confirmed } = action.params;
       if (!cardType) return { text: 'Please specify a card type: **standard**, **gold**, or **platinum**.', type: 'pick_card' };
       if (!confirmed) return { text: `Please confirm you want to apply for the **${cardType}** card.`, type: 'card_confirm', data: { cardType } };
@@ -174,8 +172,6 @@ async function executeAction(action: any, userId: string, accountNumber: string)
     }
 
     case 'LOAN_CHECK_CREDIT_SCORE': {
-      const config = getCountryConfig();
-      const sym = config.currency.symbol;
       const { amount: reqAmount, tenure: reqTenure, purpose: reqPurpose, income: reqIncome } = action.params || {};
       const loanAmt = Number(reqAmount) || 0;
       const loanTenure = Number(reqTenure) || 12;
@@ -209,8 +205,6 @@ async function executeAction(action: any, userId: string, accountNumber: string)
     }
 
     case 'LOAN_CONFIRM': {
-      const config = getCountryConfig();
-      const sym = config.currency.symbol;
       const { amount: loanAmount, tenure, purpose, creditScore, interestRate, emi, income } = action.params;
       if (!loanAmount) return { text: 'Missing loan amount.', type: 'error' };
       const finalTenure = tenure || 12;
@@ -387,10 +381,12 @@ function getSuggestedActions(actionType: string | null): any[] {
         { label: 'Cancel', icon: '❌', message: 'Never mind, cancel the transfer' },
       ];
     case 'loan_prompt':
+      const config = getCountryConfig();
+      const sym = config.currency.symbol;
       return [
-        { label: '$5,000 Loan', icon: '🏦', message: 'I want a $5,000 loan for 12 months' },
-        { label: '$10,000 Loan', icon: '🏦', message: 'I want a $10,000 loan for 24 months' },
-        { label: '$25,000 Loan', icon: '🏦', message: 'I want a $25,000 loan for 36 months' },
+        { label: `${sym}5,000 Loan`, icon: '🏦', message: `I want a ${sym}5,000 loan for 12 months` },
+        { label: `${sym}10,000 Loan`, icon: '🏦', message: `I want a ${sym}10,000 loan for 24 months` },
+        { label: `${sym}25,000 Loan`, icon: '🏦', message: `I want a ${sym}25,000 loan for 36 months` },
       ];
     default:
       return [

@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import { useTranslation, localeNames, type Locale } from '@/i18n';
 import { useTheme } from '@/theme';
+import { getAllCurrencies } from '@/config';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -18,6 +19,25 @@ export default function SettingsPage() {
   }, []);
 
   const account = accounts[0];
+  const currencies = getAllCurrencies();
+
+  const handleCurrencyChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCurrency = e.target.value;
+    try {
+      const res = await fetch('/api/accounts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currency: newCurrency }),
+      });
+      if (res.ok) {
+        // Refresh account data to reflect change
+        const data = await fetch('/api/accounts').then(r => r.json());
+        setAccounts(data.accounts || []);
+      }
+    } catch (err) {
+      console.error('Failed to update currency:', err);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -92,10 +112,16 @@ export default function SettingsPage() {
                 <p className="text-sm font-medium text-gray-700">{t('settings', 'currency')}</p>
                 <p className="text-xs text-gray-400">{t('settings', 'currencyDesc')}</p>
               </div>
-              <select className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
-                <option>USD ($)</option>
-                <option>EUR (€)</option>
-                <option>GBP (£)</option>
+              <select
+                value={account?.currency || 'USD'}
+                onChange={handleCurrencyChange}
+                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm"
+              >
+                {currencies.map((curr) => (
+                  <option key={curr.code} value={curr.code}>
+                    {curr.code} ({curr.symbol})
+                  </option>
+                ))}
               </select>
             </div>
             <div className="flex items-center justify-between">

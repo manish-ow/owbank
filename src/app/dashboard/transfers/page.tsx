@@ -79,7 +79,7 @@ export default function TransfersPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">{t('transfers', 'amount')} (USD)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">{t('transfers', 'amount')}</label>
               <input
                 type="number"
                 required
@@ -127,11 +127,7 @@ export default function TransfersPage() {
             </div>
           )}
 
-          <div className="mt-4 p-3 bg-blue-50 rounded-xl">
-            <p className="text-xs text-blue-600">
-              ⚡ {t('transfers', 'kafkaNote')}
-            </p>
-          </div>
+
         </div>
 
         {/* Transaction History */}
@@ -149,7 +145,7 @@ export default function TransfersPage() {
                 <div key={tx.reference} className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50">
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${tx.type === 'bonus' ? 'bg-green-100' :
-                        tx.type === 'transfer' ? 'bg-blue-100' : 'bg-gray-100'
+                      tx.type === 'transfer' ? 'bg-blue-100' : 'bg-gray-100'
                       }`}>
                       {tx.type === 'bonus' ? '🎁' : tx.type === 'transfer' ? '↗️' : '💰'}
                     </div>
