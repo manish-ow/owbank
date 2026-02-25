@@ -39,7 +39,7 @@ export const themes: Record<string, ThemeConfig> = {
     accentColor: '#FF3333',
     textOnPrimary: '#FFFFFF',
     assistantName: 'DBS AI Assistant',
-    accountPrefix: 'DBS',
+    accountPrefix: 'OW',
   },
   HSBC: {
     id: 'HSBC',
@@ -52,7 +52,7 @@ export const themes: Record<string, ThemeConfig> = {
     accentColor: '#DB0011',
     textOnPrimary: '#FFFFFF',
     assistantName: 'HSBC AI Assistant',
-    accountPrefix: 'HSBC',
+    accountPrefix: 'OW',
   },
   SCB: {
     id: 'SCB',
@@ -65,7 +65,7 @@ export const themes: Record<string, ThemeConfig> = {
     accentColor: '#21AA47',
     textOnPrimary: '#FFFFFF',
     assistantName: 'SCB AI Assistant',
-    accountPrefix: 'SCB',
+    accountPrefix: 'OW',
   },
   MAYB: {
     id: 'MAYB',
@@ -78,7 +78,7 @@ export const themes: Record<string, ThemeConfig> = {
     accentColor: '#FDB813',
     textOnPrimary: '#000000',
     assistantName: 'Maybank AI Assistant',
-    accountPrefix: 'MAY',
+    accountPrefix: 'OW',
   },
   UOB: {
     id: 'UOB',
@@ -91,7 +91,7 @@ export const themes: Record<string, ThemeConfig> = {
     accentColor: '#ED1C24',
     textOnPrimary: '#FFFFFF',
     assistantName: 'UOB AI Assistant',
-    accountPrefix: 'UOB',
+    accountPrefix: 'OW',
   },
   FUSION: {
     id: 'FUSION',
@@ -104,7 +104,7 @@ export const themes: Record<string, ThemeConfig> = {
     accentColor: '#B3D235',
     textOnPrimary: '#FFFFFF',
     assistantName: 'Enbi AI Assistant',
-    accountPrefix: 'NED',
+    accountPrefix: 'OW',
   },
 };
 
