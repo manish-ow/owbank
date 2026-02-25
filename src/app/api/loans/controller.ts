@@ -12,7 +12,8 @@ import { withAuth, AuthError } from '@/lib/middleware/authGuard';
 import { connectToDatabase } from '@/lib/mongodb';
 import Account from '@/models/Account';
 import Loan from '@/models/Loan';
-import { calculateEMI, getInterestRate } from '@/lib/helpers';
+import Transaction from '@/models/Transaction';
+import { calculateEMI, getInterestRate, generateReference } from '@/lib/helpers';
 import logger from '@/lib/logger';
 
 const log = logger.child({ module: 'loansController' });
@@ -72,6 +73,17 @@ export async function applyLoan(req: NextRequest): Promise<NextResponse> {
             await account.save();
             loan.status = 'disbursed';
             await loan.save();
+
+            // Record the disbursement as a transaction
+            await Transaction.create({
+                reference: generateReference(),
+                fromAccount: 'LOAN_DISBURSEMENT',
+                toAccount: account.accountNumber,
+                amount,
+                type: 'deposit',
+                status: 'completed',
+                description: `Loan disbursement - ${purpose} (${tenure} months)`,
+            });
         }
 
         log.info('Loan processed', { userId: user._id.toString(), amount, status: loan.status });

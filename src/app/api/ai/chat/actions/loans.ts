@@ -5,8 +5,9 @@
 
 import Account from '@/models/Account';
 import Loan from '@/models/Loan';
+import Transaction from '@/models/Transaction';
 import { connectToDatabase } from '@/lib/mongodb';
-import { calculateEMI, getInterestRate } from '@/lib/helpers';
+import { calculateEMI, getInterestRate, generateReference } from '@/lib/helpers';
 import { getCountryConfig } from '@/config';
 import logger from '@/lib/logger';
 import type { ActionResult } from '@/lib/types';
@@ -69,7 +70,23 @@ export async function handleLoanConfirm(action: Record<string, unknown>, userId:
 
     if (status === 'approved') {
         const account = await Account.findOne({ accountNumber });
-        if (account) { account.balance += loanAmount; await account.save(); loan.status = 'disbursed' as any; await loan.save(); }
+        if (account) {
+            account.balance += loanAmount;
+            await account.save();
+            loan.status = 'disbursed' as any;
+            await loan.save();
+
+            // Record the disbursement as a transaction
+            await Transaction.create({
+                reference: generateReference(),
+                fromAccount: 'LOAN_DISBURSEMENT',
+                toAccount: accountNumber,
+                amount: loanAmount,
+                type: 'deposit',
+                status: 'completed',
+                description: `Loan disbursement - ${finalPurpose} (${finalTenure} months)`,
+            });
+        }
     }
 
     const wasDisbursed = loan.status === ('disbursed' as any) || status === 'approved';
