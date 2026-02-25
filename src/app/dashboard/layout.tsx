@@ -31,6 +31,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     setSidebarCollapsed(mode === 'ai');
   }, [mode]);
 
+  useEffect(() => {
+    const handleOpenRequest = () => setMode('ai');
+    window.addEventListener('open-ai-chat', handleOpenRequest);
+    return () => window.removeEventListener('open-ai-chat', handleOpenRequest);
+  }, []);
+
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5F7FA]">
@@ -50,9 +56,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen bg-[#F5F7FA]">
       {/* Sidebar - responsive + collapsible */}
       <div
-        className={`transition-all duration-300 ease-in-out flex-shrink-0 hidden md:block ${
-          sidebarCollapsed ? 'w-0 overflow-hidden opacity-0' : 'w-[220px] opacity-100'
-        }`}
+        className={`transition-all duration-300 ease-in-out flex-shrink-0 hidden md:block ${sidebarCollapsed ? 'w-0 overflow-hidden opacity-0' : 'w-[220px] opacity-100'
+          }`}
       >
         <Sidebar />
       </div>

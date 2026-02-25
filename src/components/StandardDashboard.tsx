@@ -26,6 +26,7 @@ interface TransactionData {
 export default function StandardDashboard() {
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [cards, setCards] = useState<any[]>([]);
   const [myAccount, setMyAccount] = useState('');
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
@@ -37,9 +38,10 @@ export default function StandardDashboard() {
 
   const fetchData = async () => {
     try {
-      const [accRes, txRes] = await Promise.all([
+      const [accRes, txRes, cardRes] = await Promise.all([
         fetch('/api/accounts').catch(() => null),
         fetch('/api/transactions?limit=10').catch(() => null),
+        fetch('/api/cards').catch(() => null),
       ]);
       if (accRes?.ok) {
         const accData = await accRes.json();
@@ -50,14 +52,19 @@ export default function StandardDashboard() {
         setTransactions(txData.transactions || []);
         if (txData.accountNumber) setMyAccount(txData.accountNumber);
       }
+      if (cardRes?.ok) {
+        const cardData = await cardRes.json();
+        setCards(cardData.cards || []);
+      }
     } catch {
-      // Silently handle fetch errors (e.g. during hot reload)
+      // Silently handle fetch errors
     } finally {
       setLoading(false);
     }
   };
 
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const primaryCard = cards.find(c => c.status === 'active') || cards[0];
 
   if (loading) {
     return (
@@ -78,24 +85,47 @@ export default function StandardDashboard() {
           icon={countryConfig.currency.symbol}
           color={theme.primaryColor}
         />
-        <StatCard
-          title={t('dashboard', 'monthlySpending')}
-          value="$2,350.00"
-          subtitle={`+12% ${t('dashboard', 'fromLastMonth')}`}
-          icon="↗"
-          color={theme.accentColor}
-        />
+
+        {primaryCard ? (
+          <StatCard
+            title={t('dashboard', 'creditCardDue')}
+            value={formatCurrency(primaryCard.usedCredit || 0)}
+            subtitle={`+12% ${t('dashboard', 'fromLastMonth')}`}
+            icon="↗"
+            color={theme.accentColor}
+          />
+        ) : (
+          <div className="bg-white rounded-xl border border-gray-200 p-5 card-hover flex flex-col justify-between">
+            <div>
+              <p className="text-sm text-gray-500">{t('dashboard', 'creditCardDue')}</p>
+              <p className="text-xl font-bold text-gray-400 mt-2">{t('cards', 'noCards')}</p>
+            </div>
+            <a
+              href="/dashboard"
+              onClick={(e) => {
+                e.preventDefault();
+                // We could trigger AI chat here if we had a global state for it
+                window.dispatchEvent(new CustomEvent('open-ai-chat', { detail: 'I want to apply for a credit card' }));
+              }}
+              className="mt-3 text-center py-2 bg-gradient-to-r from-cyan to-blue-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition-all"
+            >
+              ✨ {t('dashboard', 'applyCard')}
+            </a>
+          </div>
+        )}
+
         <StatCard
           title={t('dashboard', 'savingsGoal')}
-          value="$12,000.00"
-          subtitle={`80% ${t('dashboard', 'ofGoal')} ($15k)`}
+          value={formatCurrency(12000)}
+          subtitle={`80% ${t('dashboard', 'ofGoal')} (${formatCurrency(15000)})`}
           icon="✓"
           color="#10B981"
         />
+
         <StatCard
           title={t('dashboard', 'creditLimit')}
-          value="$10,000.00"
-          subtitle={`${t('dashboard', 'available')}: $8,500`}
+          value={primaryCard ? formatCurrency(primaryCard.creditLimit) : formatCurrency(0)}
+          subtitle={primaryCard ? `${t('dashboard', 'available')}: ${formatCurrency(primaryCard.creditLimit - (primaryCard.usedCredit || 0))}` : t('cards', 'noCards')}
           icon="⬜"
           color="#8B5CF6"
         />
@@ -113,15 +143,14 @@ export default function StandardDashboard() {
               {transactions.map((tx) => (
                 <div key={tx.reference} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      tx.type === 'bonus' ? 'bg-green-100' :
-                      tx.type === 'transfer' ? 'bg-blue-100' :
-                      tx.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type === 'bonus' ? 'bg-green-100' :
+                        tx.type === 'transfer' ? 'bg-blue-100' :
+                          tx.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
                       <span className="text-lg">
                         {tx.type === 'bonus' ? '🎁' :
-                         tx.type === 'transfer' ? '↗️' :
-                         tx.type === 'deposit' ? '💰' : '💸'}
+                          tx.type === 'transfer' ? '↗️' :
+                            tx.type === 'deposit' ? '💰' : '💸'}
                       </span>
                     </div>
                     <div>
@@ -132,9 +161,8 @@ export default function StandardDashboard() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-sm font-semibold ${
-                      tx.type === 'bonus' || tx.type === 'deposit' || tx.toAccount === myAccount ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    <p className={`text-sm font-semibold ${tx.type === 'bonus' || tx.type === 'deposit' || tx.toAccount === myAccount ? 'text-green-600' : 'text-red-600'
+                      }`}>
                       {tx.type === 'bonus' || tx.type === 'deposit' || tx.toAccount === myAccount ? '+' : '-'}
                       {formatCurrency(tx.amount)}
                     </p>
@@ -209,13 +237,12 @@ function QuickActionBtn({
   return (
     <a
       href={href}
-      className={`flex items-center gap-3 w-full py-3 px-4 rounded-xl font-medium text-sm transition-all ${
-        primary
+      className={`flex items-center gap-3 w-full py-3 px-4 rounded-xl font-medium text-sm transition-all ${primary
           ? 'text-white hover:opacity-90'
           : accent
-          ? 'text-white hover:opacity-90'
-          : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-      }`}
+            ? 'text-white hover:opacity-90'
+            : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+        }`}
       style={primary ? { backgroundColor: primaryColor } : accent ? { backgroundColor: accentColor } : {}}
     >
       <span>{icon}</span>

@@ -242,6 +242,16 @@ export default function AIChat() {
     }
   };
 
+  useEffect(() => {
+    const handleOpenChat = (e: any) => {
+      if (e.detail) {
+        sendMessage(e.detail);
+      }
+    };
+    window.addEventListener('open-ai-chat', handleOpenChat);
+    return () => window.removeEventListener('open-ai-chat', handleOpenChat);
+  }, [sendMessage]);
+
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
       {/* Header */}
@@ -443,8 +453,8 @@ export default function AIChat() {
               onClick={toggleVoice}
               disabled={loading}
               className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border disabled:opacity-30 ${isListening
-                  ? 'bg-red-50 border-red-300 animate-pulse'
-                  : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
+                ? 'bg-red-50 border-red-300 animate-pulse'
+                : 'border-gray-200 bg-gray-50 hover:bg-gray-100'
                 }`}
               title={isListening ? t('aiChat', 'listening') : t('aiChat', 'voiceInput')}
             >

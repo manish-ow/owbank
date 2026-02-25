@@ -73,10 +73,8 @@ export default function TransfersPage() {
                 type="text"
                 required
                 value={form.toAccount}
-                onChange={(e) => setForm({ ...form, toAccount: e.target.value.toUpperCase() })}
+                onChange={(e) => setForm({ ...form, toAccount: e.target.value })}
                 placeholder={t('transfers', 'recipientPlaceholder')}
-                pattern="OW\d{5}"
-                title={t('transfers', 'accountFormat')}
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-cyan"
               />
             </div>
@@ -150,10 +148,9 @@ export default function TransfersPage() {
               {transactions.map((tx) => (
                 <div key={tx.reference} className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-gray-50">
                   <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${
-                      tx.type === 'bonus' ? 'bg-green-100' :
-                      tx.type === 'transfer' ? 'bg-blue-100' : 'bg-gray-100'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm ${tx.type === 'bonus' ? 'bg-green-100' :
+                        tx.type === 'transfer' ? 'bg-blue-100' : 'bg-gray-100'
+                      }`}>
                       {tx.type === 'bonus' ? '🎁' : tx.type === 'transfer' ? '↗️' : '💰'}
                     </div>
                     <div>
@@ -161,9 +158,8 @@ export default function TransfersPage() {
                       <p className="text-xs text-gray-400">{new Date(tx.createdAt).toLocaleString()}</p>
                     </div>
                   </div>
-                  <span className={`text-sm font-semibold ${
-                    tx.type === 'bonus' || tx.toAccount === myAccount ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <span className={`text-sm font-semibold ${tx.type === 'bonus' || tx.toAccount === myAccount ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {tx.type === 'bonus' || tx.toAccount === myAccount ? '+' : '-'}${tx.amount.toFixed(2)}
                   </span>
                 </div>

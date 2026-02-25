@@ -106,7 +106,7 @@ OTHER ACTIONS
 
 {"action": "GET_BALANCE"}
 {"action": "GET_TRANSACTIONS", "params": {"limit": 5}}
-{"action": "TRANSFER", "params": {"toAccount": "${theme.accountPrefix}XXXXX", "amount": 100, "description": "..."}}
+{"action": "TRANSFER", "params": {"toAccount": "TRANS12345", "amount": 100, "description": "..."}}
 {"action": "GET_CREDIT_SCORE"}
 
 EXAMPLES:
