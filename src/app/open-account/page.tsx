@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme';
+import { getCountryConfig } from '@/config';
 import BankLogo from '@/components/BankLogo';
 
 export default function OpenAccountPage() {
@@ -22,6 +23,8 @@ export default function OpenAccountPage() {
   const [result, setResult] = useState<any>(null);
   const { t } = useTranslation();
   const theme = useTheme();
+  const config = getCountryConfig();
+  const currencySymbol = config.currency.symbol;
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -78,7 +81,7 @@ export default function OpenAccountPage() {
           </div>
           <div className="bg-green-50 rounded-xl p-5 mb-6 border border-green-100">
             <p className="text-xs text-green-600 uppercase tracking-wider mb-1">{t('openAccount', 'welcomeBonusCredited')}</p>
-            <p className="text-2xl font-bold text-green-700">$1,000.00</p>
+            <p className="text-2xl font-bold text-green-700">{currencySymbol}{config.welcomeBonus.toLocaleString()}.00</p>
           </div>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
@@ -180,7 +183,7 @@ export default function OpenAccountPage() {
                 </div>
                 <div className="p-4 rounded-xl bg-green-50 border border-green-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0"><span className="text-green-700 font-bold">$</span></div>
+                    <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0"><span className="text-green-700 font-bold">{currencySymbol}</span></div>
                     <div>
                       <p className="text-sm font-semibold text-green-800">{t('openAccount', 'welcomeBonus')}</p>
                       <p className="text-xs text-green-600">{t('openAccount', 'welcomeBonusDesc')}</p>

@@ -14,6 +14,7 @@ import Account from '@/models/Account';
 import Loan from '@/models/Loan';
 import Transaction from '@/models/Transaction';
 import { calculateEMI, getInterestRate, generateReference } from '@/lib/helpers';
+import { getCountryConfig } from '@/config';
 import logger from '@/lib/logger';
 
 const log = logger.child({ module: 'loansController' });
@@ -46,8 +47,10 @@ export async function applyLoan(req: NextRequest): Promise<NextResponse> {
         if (!amount || !tenure || !purpose) {
             return NextResponse.json({ error: 'Amount, tenure, and purpose are required' }, { status: 400 });
         }
+        const config = getCountryConfig();
+        const sym = config.currency.symbol;
         if (amount < 1000 || amount > 100000) {
-            return NextResponse.json({ error: 'Loan amount must be between $1,000 and $100,000' }, { status: 400 });
+            return NextResponse.json({ error: `Loan amount must be between ${sym}1,000 and ${sym}100,000` }, { status: 400 });
         }
 
         const score = creditScore || Math.floor(650 + Math.random() * 200);
@@ -100,7 +103,7 @@ export async function applyLoan(req: NextRequest): Promise<NextResponse> {
                 creditScore: loan.creditScore,
             },
             message: status === 'approved'
-                ? `Loan of $${amount.toFixed(2)} approved and disbursed! EMI: $${emiAmount}/month`
+                ? `Loan of ${sym}${amount.toFixed(2)} approved and disbursed! EMI: ${sym}${emiAmount}/month`
                 : 'Loan application submitted for review.',
         });
     } catch (error: unknown) {
