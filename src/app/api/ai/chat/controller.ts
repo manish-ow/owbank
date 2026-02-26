@@ -14,6 +14,8 @@ import { extractActionJson, cleanAiResponse } from './actionParser';
 import { executeAction } from './actionDispatcher';
 import { getSuggestedActions } from './suggestedActions';
 import { getServerThemeConfig } from '@/theme/themes';
+import ChatHistory from '@/models/ChatHistory';
+import crypto from 'crypto';
 import logger from '@/lib/logger';
 
 const log = logger.child({ module: 'chatController' });
@@ -58,7 +60,8 @@ export async function handleChatRequest(req: NextRequest): Promise<NextResponse>
         const { messages, imageData, imageMimeType } = await req.json();
 
         // Non-banking guard
-        const lastUserMsg = messages[messages.length - 1]?.parts?.[0]?.text?.toLowerCase() || '';
+        const lastUserMsgOriginal = messages[messages.length - 1]?.parts?.[0]?.text || '';
+        const lastUserMsg = lastUserMsgOriginal.toLowerCase();
         const isNonBanking = NON_BANKING_PATTERNS.some((p) => p.test(lastUserMsg));
         if (isNonBanking) {
             const theme = getServerThemeConfig();
@@ -111,12 +114,33 @@ export async function handleChatRequest(req: NextRequest): Promise<NextResponse>
             actionType = inferActionType(aiResponse);
         }
 
-        return NextResponse.json({
+        const responseBody = {
             response: finalResponse || "I'm here to help! Ask me about your balance, transactions, or apply for cards and loans.",
             agent: classifyAgent(finalResponse, actionType),
             actionType, actionData,
             suggestedActions: getSuggestedActions(actionType, finalResponse),
-        });
+        };
+
+        // Persist user + model messages to ChatHistory (fire-and-forget)
+        ChatHistory.findOneAndUpdate(
+            { userId: user._id, sessionType: 'banking' },
+            {
+                $push: {
+                    messages: {
+                        $each: [
+                            { role: 'user', text: lastUserMsgOriginal, timestamp: new Date() },
+                            { role: 'model', text: responseBody.response, actionType: actionType || undefined, agent: responseBody.agent, timestamp: new Date() },
+                        ],
+                        $slice: -20,
+                    },
+                },
+                $inc: { 'metadata.messageCount': 1 },
+                $setOnInsert: { sessionId: crypto.randomUUID(), sessionType: 'banking', userId: user._id },
+            },
+            { upsert: true, new: true },
+        ).catch((err: Error) => log.error('Failed to persist chat history', { error: err.message }));
+
+        return NextResponse.json(responseBody);
     } catch (error: unknown) {
         if (error instanceof AuthError) return error.response;
         const err = error as Error;

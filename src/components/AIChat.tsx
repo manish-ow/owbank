@@ -26,9 +26,12 @@ function renderMarkdown(text: string): string {
     // Lists
     .replace(/^- (.+)/gm, '<li>$1</li>')
     // Wrap consecutive <li> in <ul>
-    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul class="list-disc pl-4 space-y-1">$1</ul>')
+    .replace(/((?:<li>.*<\/li>\n?)+)/g, '<ul class="list-disc pl-4 space-y-0.5">$1</ul>')
     // Line breaks
-    .replace(/\n/g, '<br/>');
+    .replace(/\n/g, '<br/>')
+    // Remove <br/> immediately before and after <ul>/<li> tags to avoid double spacing
+    .replace(/<br\/>\s*(<\/?ul|<\/?li)/g, '$1')
+    .replace(/(\/ul>|\/li>)\s*<br\/>/g, '$1');
   return html;
 }
 
@@ -81,6 +84,39 @@ export default function AIChat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const historyLoaded = useRef(false);
+
+  // Load chat history from MongoDB on mount
+  useEffect(() => {
+    if (historyLoaded.current) return;
+    historyLoaded.current = true;
+
+    fetch('/api/ai/chat/history')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.messages && data.messages.length > 0) {
+          const loaded: Message[] = data.messages.map((m: any) => ({
+            role: m.role,
+            content: m.text,
+            agent: m.agent || 'Manager',
+            actionType: m.actionType,
+          }));
+          // Prepend the welcome message
+          setMessages([
+            {
+              role: 'model',
+              content: t('aiChat', 'welcomeMessage'),
+              agent: 'Manager',
+              suggestedActions: defaultActions,
+            },
+            ...loaded,
+          ]);
+        }
+      })
+      .catch(() => {
+        // Silently fail — keep the default welcome message
+      });
+  }, [t, defaultActions]);
 
   // Image upload state
   const [attachedImage, setAttachedImage] = useState<{ dataUrl: string; base64: string; mimeType: string } | null>(null);
@@ -99,7 +135,7 @@ export default function AIChat() {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      recognition.lang = 'en-US'; //TODO try other langauges
 
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;

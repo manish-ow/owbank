@@ -40,7 +40,7 @@
     },
     "loanSettings": {
         "maxAmount": 1000000,
-        "minAmount": 10000,
+        "minAmount": 5000,
         "maxTenureMonths": 60,
         "minTenureMonths": 6
     }

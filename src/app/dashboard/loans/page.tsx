@@ -39,7 +39,7 @@ export default function LoansPage() {
       .finally(() => setLoading(false));
   };
 
-  const handleLoanSubmit = (e: React.FormEvent) => {
+  const handleLoanSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setShowConfirm(true);
   };
@@ -101,12 +101,11 @@ export default function LoansPage() {
             <div key={loan._id} className="bg-white rounded-xl border border-gray-200 p-5 card-hover">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-500">{t('loans', 'personalLoan')}</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                  loan.status === 'disbursed' ? 'bg-green-100 text-green-700' :
-                  loan.status === 'approved' ? 'bg-blue-100 text-blue-700' :
-                  loan.status === 'rejected' ? 'bg-red-100 text-red-700' :
-                  'bg-yellow-100 text-yellow-700'
-                }`}>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${loan.status === 'disbursed' ? 'bg-green-100 text-green-700' :
+                    loan.status === 'approved' ? 'bg-blue-100 text-blue-700' :
+                      loan.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                  }`}>
                   {loan.status}
                 </span>
               </div>
@@ -198,11 +197,10 @@ export default function LoansPage() {
                       setForm({ ...form, creditScore: opt.value });
                       setResult(null);
                     }}
-                    className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                      form.creditScore === opt.value
+                    className={`py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all ${form.creditScore === opt.value
                         ? 'border-cyan bg-blue-50'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                    }`}
+                      }`}
                     style={form.creditScore === opt.value ? { color: theme.primaryColor } : undefined}
                   >
                     {opt.label}

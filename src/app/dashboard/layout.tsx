@@ -12,7 +12,7 @@ import { useTheme } from '@/theme';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [mode, setMode] = useState<'standard' | 'ai'>('standard');
+  const [mode, setMode] = useState<'standard' | 'ai'>('ai');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
