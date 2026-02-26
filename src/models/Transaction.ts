@@ -21,7 +21,7 @@ const TransactionSchema = new Schema<ITransaction>(
     fromAccount: { type: String, required: true },
     toAccount: { type: String },
     amount: { type: Number, required: true },
-    currency: { type: String, default: 'USD' },
+    currency: { type: String, default: 'ZAR' },
     type: {
       type: String,
       enum: ['transfer', 'deposit', 'withdrawal', 'bill_payment', 'bonus'],
