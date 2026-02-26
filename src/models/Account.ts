@@ -22,7 +22,7 @@ const AccountSchema = new Schema<IAccount>(
     accountNumber: { type: String, required: true, unique: true },
     accountType: { type: String, enum: ['savings', 'checking'], default: 'savings' },
     balance: { type: Number, default: 1000, min: 0 }, // $1000 bonus on open
-    currency: { type: String, default: 'USD' },
+    currency: { type: String, default: 'ZAR' },
     status: { type: String, enum: ['active', 'frozen', 'closed'], default: 'active' },
     kycVerified: { type: Boolean, default: false },
     fullName: { type: String, required: true },

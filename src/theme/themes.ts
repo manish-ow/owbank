@@ -96,7 +96,7 @@ export const themes: Record<string, ThemeConfig> = {
   FUSION: {
     id: 'FUSION',
     logo: 'Fusion',
-    logoUrl: '/logos/fusion.png',
+    logoUrl: '/logos/owbank-logo.png',
     fullName: 'Fusion',
     tagline: 'Make Things Happen',
     primaryColor: '#004B23',

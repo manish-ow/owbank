@@ -1,13 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import { useState } from 'react';
 import { useTheme } from '@/theme';
 
 const sizes = {
-  sm: { box: 28, img: 20 },
-  md: { box: 32, img: 24 },
-  lg: { box: 40, img: 30 },
+  sm: { box: 50, img: 36 },
+  md: { box: 58, img: 43 },
+  lg: { box: 72, img: 54 },
 } as const;
 
 interface BankLogoProps {
@@ -21,7 +20,6 @@ export default function BankLogo({ size = 'md', className = '' }: BankLogoProps)
   const { box, img } = sizes[size];
 
   if (imgError || !theme.logoUrl) {
-    // Fallback to text logo
     return (
       <div
         className={`rounded-lg flex items-center justify-center ${className}`}
@@ -42,7 +40,8 @@ export default function BankLogo({ size = 'md', className = '' }: BankLogoProps)
       className={`rounded-lg flex items-center justify-center overflow-hidden bg-white ${className}`}
       style={{ width: box, height: box }}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={theme.logoUrl}
         alt={`${theme.fullName} logo`}
         width={img}

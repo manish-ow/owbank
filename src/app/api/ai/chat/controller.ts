@@ -37,7 +37,7 @@ function classifyAgent(responseText: string, actionType: string | null): string 
     const lower = (responseText || '').toLowerCase();
     if (lower.includes('transfer') || lower.includes('transaction') || actionType === 'transfer_success' || actionType === 'transactions') return 'Transaction';
     if (lower.includes('card') || lower.includes('credit limit') || actionType === 'card_issued' || actionType === 'pick_card') return 'Card';
-    if (lower.includes('loan') || lower.includes('emi') || lower.includes('tenure') || actionType === 'loan_result') return 'Loan';
+    if (lower.includes('loan') || lower.includes('emi') || lower.includes('tenure') || actionType === 'loan_result' || actionType === 'loan_credit_check') return 'Loan';
     return 'Manager';
 }
 

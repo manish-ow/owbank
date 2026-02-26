@@ -68,8 +68,8 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
     {
         test: (l) =>
             ((l.includes('which card') || l.includes('apply for')) &&
-            (l.includes('card') || l.includes('credit')) ||
-            (l.includes('standard') && l.includes('gold') && l.includes('platinum'))) &&
+                (l.includes('card') || l.includes('credit')) ||
+                (l.includes('standard') && l.includes('gold') && l.includes('platinum'))) &&
             !l.includes('approved') && !l.includes('issued') && !l.includes('activated'),
         actions: () => [
             { label: '💳 Standard', icon: '💳', message: 'I want the Standard card' },
@@ -91,19 +91,30 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
 
     // ─── Loan Journey ──────────────────────────
 
-    // Loan purpose question (only when AI is asking)
+    // Loan purpose question (only when AI is asking) — GenZ-friendly options
     {
         test: (l) =>
-            l.includes('purpose') && (l.includes('loan') || l.includes('borrow')) &&
-            (l.includes('?') || l.includes('what') || l.includes('reason')) &&
+            (l.includes('purpose') || l.includes('what do you need') || l.includes('what.s the loan for') || l.includes('money for')) &&
+            (l.includes('loan') || l.includes('borrow') || l.includes('money')) &&
             !l.includes('approved') && !l.includes('disbursed') && !l.includes('credited'),
         actions: () => [
-            { label: '🏠 Home', icon: '🏠', message: 'Home renovation' },
-            { label: '📚 Education', icon: '📚', message: 'Education expenses' },
-            { label: '🚗 Vehicle', icon: '🚗', message: 'Vehicle purchase' },
-            { label: '💊 Medical', icon: '💊', message: 'Medical expenses' },
-            { label: '💼 Business', icon: '💼', message: 'Business investment' },
-            { label: '👤 Personal', icon: '👤', message: 'Personal use' },
+            { label: '👔 New outfits', icon: '👔', message: 'New suits for my first job' },
+            { label: '📱 Tech/Gadgets', icon: '📱', message: 'Tech and gadgets' },
+            { label: '🎓 Study vibes', icon: '🎓', message: 'Education expenses' },
+            { label: '🚗 Wheels', icon: '🚗', message: 'Vehicle purchase' },
+            { label: '🏠 Home setup', icon: '🏠', message: 'Home setup and furniture' },
+            { label: '💼 Side hustle', icon: '💼', message: 'Starting a business' },
+        ],
+    },
+
+    // Payslip upload prompt
+    {
+        test: (l) =>
+            (l.includes('payslip') || l.includes('proof of income') || l.includes('upload')) &&
+            (l.includes('attach') || l.includes('upload') || l.includes('provide')) &&
+            !l.includes('verified') && !l.includes('approved') && !l.includes('disbursed'),
+        actions: () => [
+            { label: '📎 Upload Payslip', icon: '📎', message: 'I\'ve uploaded my payslip' },
         ],
     },
 
@@ -273,6 +284,11 @@ function getActionTypeActions(actionType: string | null): SuggestedAction[] {
             return [
                 { label: '✅ Accept Offer', icon: '✅', message: 'Yes, I accept the loan offer' },
                 { label: '❌ No Thanks', icon: '❌', message: 'No, I want to reconsider' },
+            ];
+        case 'loan_credit_check':
+            return [
+                { label: '🔥 Lock it in!', icon: '🔥', message: 'Yes, I accept the loan offer' },
+                { label: '🤔 Let me think', icon: '🤔', message: 'Let me reconsider' },
             ];
         case 'credit_score':
             return [

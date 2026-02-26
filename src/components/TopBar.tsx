@@ -55,7 +55,7 @@ export default function TopBar({ mode, onModeChange, sidebarCollapsed, onToggleS
         {/* Logo - visible when sidebar is collapsed (e.g. AI First mode) */}
         {sidebarCollapsed && (
           <div className="flex items-center gap-2 transition-opacity duration-300">
-            <BankLogo size="sm" />
+            <BankLogo size="md" />
             <span className="text-base font-bold hidden sm:inline" style={{ color: theme.primaryColor }}>{theme.fullName}</span>
           </div>
         )}
@@ -67,8 +67,8 @@ export default function TopBar({ mode, onModeChange, sidebarCollapsed, onToggleS
           <button
             onClick={() => onModeChange('ai')}
             className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-all ${mode === 'ai'
-                ? 'bg-white shadow-sm text-gray-800'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-white shadow-sm text-gray-800'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,8 +79,8 @@ export default function TopBar({ mode, onModeChange, sidebarCollapsed, onToggleS
           <button
             onClick={() => onModeChange('standard')}
             className={`flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-md text-xs font-medium transition-all ${mode === 'standard'
-                ? 'bg-white shadow-sm text-gray-800'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'bg-white shadow-sm text-gray-800'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

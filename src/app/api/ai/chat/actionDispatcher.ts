@@ -7,7 +7,7 @@ import { handleGetBalance, handleGetCreditScore } from './actions/balance';
 import { handleGetTransactions } from './actions/transactions';
 import { handleTransferInitiate, handleTransferConfirm } from './actions/transfer';
 import { handleCardCheckEligibility, handleApplyCreditCard } from './actions/cards';
-import { handleLoanCheckCreditScore, handleLoanConfirm } from './actions/loans';
+import { handleLoanCheckCreditScore, handleLoanConfirm, handleLoanPayslipVerify } from './actions/loans';
 import logger from '@/lib/logger';
 import type { ActionResult } from '@/lib/types';
 
@@ -33,6 +33,7 @@ export async function executeAction(
         case 'CARD_CHECK_ELIGIBILITY': return handleCardCheckEligibility(action);
         case 'APPLY_CREDIT_CARD': return handleApplyCreditCard(action, userId, accountNumber);
         case 'LOAN_CHECK_CREDIT_SCORE': return handleLoanCheckCreditScore(action, userId, accountNumber);
+        case 'LOAN_VERIFY_PAYSLIP': return handleLoanPayslipVerify(action, userId, accountNumber);
         case 'LOAN_CONFIRM': return handleLoanConfirm(action, userId, accountNumber);
         case 'GET_CREDIT_SCORE': return handleGetCreditScore(action, userId, accountNumber);
         default:

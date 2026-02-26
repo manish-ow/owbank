@@ -144,8 +144,8 @@ export default function StandardDashboard() {
                 <div key={tx.reference} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.type === 'bonus' ? 'bg-green-100' :
-                        tx.type === 'transfer' ? 'bg-blue-100' :
-                          tx.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
+                      tx.type === 'transfer' ? 'bg-blue-100' :
+                        tx.type === 'deposit' ? 'bg-green-100' : 'bg-red-100'
                       }`}>
                       <span className="text-lg">
                         {tx.type === 'bonus' ? '🎁' :
@@ -181,7 +181,7 @@ export default function StandardDashboard() {
           <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('dashboard', 'quickActions')}</h3>
           <div className="space-y-3">
             <QuickActionBtn href="/dashboard/transfers" label={t('dashboard', 'transferMoney')} icon="↗" primary primaryColor={theme.primaryColor} accentColor={theme.accentColor} />
-            <QuickActionBtn href="/dashboard/transfers" label={t('dashboard', 'addMoney')} icon="+" accent primaryColor={theme.primaryColor} accentColor={theme.accentColor} />
+            {/* <QuickActionBtn href="/dashboard/transfers" label={t('dashboard', 'addMoney')} icon="+" accent primaryColor={theme.primaryColor} accentColor={theme.accentColor} /> */}
             <QuickActionBtn href="/dashboard/transfers" label={t('dashboard', 'payBill')} icon="⬜" primaryColor={theme.primaryColor} accentColor={theme.accentColor} />
           </div>
         </div>
@@ -238,10 +238,10 @@ function QuickActionBtn({
     <a
       href={href}
       className={`flex items-center gap-3 w-full py-3 px-4 rounded-xl font-medium text-sm transition-all ${primary
+        ? 'text-white hover:opacity-90'
+        : accent
           ? 'text-white hover:opacity-90'
-          : accent
-            ? 'text-white hover:opacity-90'
-            : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+          : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
         }`}
       style={primary ? { backgroundColor: primaryColor } : accent ? { backgroundColor: accentColor } : {}}
     >

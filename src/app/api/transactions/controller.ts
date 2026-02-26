@@ -81,77 +81,71 @@ export async function transfer(req: NextRequest): Promise<NextResponse> {
 
         const reference = generateReference();
 
-        // Perform the heavy lifting in the background
-        (async () => {
-            const dbSession = await mongoose.startSession();
-            dbSession.startTransaction();
-            try {
-                // 1. Publish initiation (ignore failure)
-                try {
-                    await publishTransactionEvent({
-                        type: 'TRANSFER_INITIATED',
-                        fromAccount: senderAccount.accountNumber,
-                        toAccount,
-                        amount,
-                        reference,
-                        timestamp: new Date().toISOString(),
-                    });
-                } catch (k) { /* ignore */ }
-
-                // 2. Re-fetch accounts within the transaction session for atomic update
-                const sender = await Account.findOne({ accountNumber: senderAccount.accountNumber }).session(dbSession);
-                const recipient = await Account.findOne({ accountNumber: toAccount }).session(dbSession);
-
-                if (!sender || !recipient) {
-                    throw new Error('Account not found in transaction');
-                }
-
-                sender.balance -= amount;
-                recipient.balance += amount;
-                await sender.save({ session: dbSession });
-                await recipient.save({ session: dbSession });
-
-                // 3. Create transaction record
-                const transaction = await Transaction.create([{
-                    reference,
-                    fromAccount: senderAccount.accountNumber,
-                    toAccount,
-                    amount,
-                    type: 'transfer',
-                    status: 'completed',
-                    description: description || `Transfer to ${toAccount}`,
-                }], { session: dbSession });
-
-                await dbSession.commitTransaction();
-
-                // 4. Publish completion
-                try {
-                    await publishTransactionEvent({
-                        type: 'TRANSFER_COMPLETED',
-                        fromAccount: senderAccount.accountNumber,
-                        toAccount,
-                        amount,
-                        reference,
-                        timestamp: new Date().toISOString(),
-                    });
-                } catch (k) { /* ignore */ }
-
-                log.info('Background transfer completed', { reference, from: senderAccount.accountNumber, to: toAccount });
-            } catch (txError) {
-                await dbSession.abortTransaction();
-                log.error('Background transfer failed', { reference, error: (txError as Error).message });
-            } finally {
-                dbSession.endSession();
-            }
-        })();
-
-        const config = getCountryConfig();
-        return NextResponse.json({
-            success: true,
-            status: 'submitted',
+        // Publish initiation event (fire-and-forget)
+        publishTransactionEvent({
+            type: 'TRANSFER_INITIATED',
+            fromAccount: senderAccount.accountNumber,
+            toAccount,
+            amount,
             reference,
-            message: `Bank transfer of ${config.currency.symbol}${amount.toFixed(2)} to ${toAccount} submitted successfully.`,
-        });
+            timestamp: new Date().toISOString(),
+        }).catch(() => { /* ignore */ });
+
+        // Execute the transfer atomically
+        const dbSession = await mongoose.startSession();
+        dbSession.startTransaction();
+        try {
+            const sender = await Account.findOne({ accountNumber: senderAccount.accountNumber }).session(dbSession);
+            const recipient = await Account.findOne({ accountNumber: toAccount }).session(dbSession);
+
+            if (!sender || !recipient) {
+                throw new Error('Account not found in transaction');
+            }
+
+            sender.balance -= amount;
+            recipient.balance += amount;
+            await sender.save({ session: dbSession });
+            await recipient.save({ session: dbSession });
+
+            await Transaction.create([{
+                reference,
+                fromAccount: senderAccount.accountNumber,
+                toAccount,
+                amount,
+                type: 'transfer',
+                status: 'completed',
+                description: description || `Transfer to ${toAccount}`,
+            }], { session: dbSession });
+
+            await dbSession.commitTransaction();
+            dbSession.endSession();
+
+            // Publish completion event (fire-and-forget)
+            publishTransactionEvent({
+                type: 'TRANSFER_COMPLETED',
+                fromAccount: senderAccount.accountNumber,
+                toAccount,
+                amount,
+                reference,
+                timestamp: new Date().toISOString(),
+            }).catch(() => { /* ignore */ });
+
+            log.info('Transfer completed', { reference, from: senderAccount.accountNumber, to: toAccount });
+
+            const config = getCountryConfig();
+            return NextResponse.json({
+                success: true,
+                status: 'completed',
+                reference,
+                newBalance: sender.balance,
+                message: `Bank transfer of ${config.currency.symbol}${amount.toFixed(2)} to ${toAccount} submitted successfully.`,
+            });
+        } catch (txError) {
+            await dbSession.abortTransaction();
+            dbSession.endSession();
+            log.error('Transfer failed', { reference, error: (txError as Error).message });
+            return NextResponse.json({ error: 'Transfer failed. Please try again.' }, { status: 500 });
+        }
     } catch (error: unknown) {
         if (error instanceof AuthError) return error.response;
         log.error('Transfer error', { error: (error as Error).message });

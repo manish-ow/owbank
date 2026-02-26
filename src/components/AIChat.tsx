@@ -4,6 +4,27 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme';
 
+// Play a celebration ding sound using Web Audio API
+function playDingSound() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    // Play ascending notes for a celebration feel
+    osc.frequency.setValueAtTime(523, ctx.currentTime); // C5
+    osc.frequency.setValueAtTime(659, ctx.currentTime + 0.15); // E5
+    osc.frequency.setValueAtTime(784, ctx.currentTime + 0.3); // G5
+    osc.frequency.setValueAtTime(1047, ctx.currentTime + 0.45); // C6
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.8);
+  } catch { /* ignore audio errors */ }
+}
+
 interface SuggestedAction {
   label: string;
   icon: string;
@@ -16,6 +37,7 @@ interface Message {
   agent?: string;
   suggestedActions?: SuggestedAction[];
   actionType?: string;
+  actionData?: any;
   imageUrl?: string; // base64 data URL for displaying attached images
 }
 
@@ -85,6 +107,7 @@ export default function AIChat() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const historyLoaded = useRef(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // Load chat history from MongoDB on mount
   useEffect(() => {
@@ -278,8 +301,16 @@ export default function AIChat() {
             agent: data.agent || 'Manager',
             suggestedActions: data.suggestedActions || defaultActions,
             actionType: data.actionType,
+            actionData: data.actionData,
           },
         ]);
+
+        // Trigger celebration for approved loans
+        if (data.actionData?.celebrate) {
+          playDingSound();
+          setShowCelebration(true);
+          setTimeout(() => setShowCelebration(false), 4000);
+        }
       }
     } catch (err) {
       setMessages((prev) => [
@@ -307,7 +338,33 @@ export default function AIChat() {
   }, [sendMessage]);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
+    <div className="flex flex-col h-[calc(100vh-64px)] relative">
+      {/* Celebration Confetti Overlay */}
+      {showCelebration && (
+        <div className="absolute inset-0 z-50 pointer-events-none overflow-hidden">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute text-2xl"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: '-40px',
+                animation: `confetti-fall ${1.5 + Math.random() * 2}s ease-in forwards`,
+                animationDelay: `${Math.random() * 0.8}s`,
+                transform: `rotate(${Math.random() * 360}deg)`,
+              }}
+            >
+              {['🎉', '🎊', '💰', '🔥', '✨', '💸', '🥳', '⭐'][Math.floor(Math.random() * 8)]}
+            </div>
+          ))}
+          <style>{`
+            @keyframes confetti-fall {
+              0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+              100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+            }
+          `}</style>
+        </div>
+      )}
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -388,6 +445,34 @@ export default function AIChat() {
                     dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
                   />
                 </div>
+
+                {/* Credit Check Progress Card */}
+                {msg.actionType === 'loan_credit_check' && msg.actionData?.steps && (
+                  <div className="mt-2 rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-3">
+                    <div className="space-y-2">
+                      {(msg.actionData.steps as any[]).map((step: any, idx: number) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-green-500 text-sm">✅</span>
+                          <span className="text-sm text-green-700 font-medium">{step.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Vibey Celebration Card for Loan Approval */}
+                {msg.actionType === 'loan_result' && msg.actionData?.celebrate && (
+                  <div
+                    className="mt-2 rounded-xl p-4 text-white"
+                    style={{ background: `linear-gradient(135deg, ${theme.primaryColor}, ${theme.accentColor})` }}
+                  >
+                    <div className="text-center">
+                      <div className="text-3xl mb-1">🎉💸🎉</div>
+                      <p className="text-lg font-bold">Money&apos;s in your account!</p>
+                      <p className="text-sm opacity-90 mt-1">Go make it happen 🔥</p>
+                    </div>
+                  </div>
+                )}
               </div>
               {msg.role === 'user' && (
                 <div
