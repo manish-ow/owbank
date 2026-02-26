@@ -32,12 +32,13 @@ interface ResponsePattern {
 const RESPONSE_PATTERNS: ResponsePattern[] = [
     // ─── Card Journey ───────────────────────────
 
-    // Employment status question
+    // Employment status question (only when AI is asking during card application)
     {
         test: (l) =>
             (l.includes('employment') || l.includes('employed')) &&
             (l.includes('self-employed') || l.includes('self employed')) &&
-            (l.includes('student') || l.includes('retired')),
+            (l.includes('student') || l.includes('retired')) &&
+            !l.includes('approved') && !l.includes('issued') && !l.includes('activated'),
         actions: () => [
             { label: '💼 Employed', icon: '💼', message: 'I am employed' },
             { label: '🏢 Self-employed', icon: '🏢', message: 'I am self-employed' },
@@ -46,11 +47,12 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
         ],
     },
 
-    // Annual income question
+    // Annual income question (only when AI is asking)
     {
         test: (l) =>
             (l.includes('annual income') || l.includes('yearly income') || l.includes('annual salary') || l.includes('yearly salary')) &&
-            (l.includes('?') || l.includes('how much')),
+            (l.includes('?') || l.includes('how much')) &&
+            !l.includes('approved') && !l.includes('issued') && !l.includes('activated') && !l.includes('disbursed'),
         actions: () => {
             const sym = getCountryConfig().currency.symbol;
             return [
@@ -62,12 +64,13 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
         },
     },
 
-    // Card type selection — "which card" or all three types mentioned
+    // Card type selection (only when AI is asking)
     {
         test: (l) =>
-            (l.includes('which card') || l.includes('apply for')) &&
+            ((l.includes('which card') || l.includes('apply for')) &&
             (l.includes('card') || l.includes('credit')) ||
-            (l.includes('standard') && l.includes('gold') && l.includes('platinum')),
+            (l.includes('standard') && l.includes('gold') && l.includes('platinum'))) &&
+            !l.includes('approved') && !l.includes('issued') && !l.includes('activated'),
         actions: () => [
             { label: '💳 Standard', icon: '💳', message: 'I want the Standard card' },
             { label: '🥇 Gold', icon: '🥇', message: 'I want the Gold card' },
@@ -75,10 +78,11 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
         ],
     },
 
-    // Cyber insurance question
+    // Cyber insurance question (only when AI is asking)
     {
         test: (l) =>
-            l.includes('cyber insurance') && (l.includes('?') || l.includes('would you like') || l.includes('want')),
+            l.includes('cyber insurance') && (l.includes('?') || l.includes('would you like') || l.includes('want')) &&
+            !l.includes('approved') && !l.includes('issued') && !l.includes('activated'),
         actions: () => [
             { label: '✅ Yes, add it', icon: '🛡️', message: 'Yes, I want cyber insurance' },
             { label: '❌ No thanks', icon: '❌', message: 'No, I don\'t need cyber insurance' },
@@ -87,11 +91,12 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
 
     // ─── Loan Journey ──────────────────────────
 
-    // Loan purpose question
+    // Loan purpose question (only when AI is asking)
     {
         test: (l) =>
             l.includes('purpose') && (l.includes('loan') || l.includes('borrow')) &&
-            (l.includes('?') || l.includes('what') || l.includes('reason')),
+            (l.includes('?') || l.includes('what') || l.includes('reason')) &&
+            !l.includes('approved') && !l.includes('disbursed') && !l.includes('credited'),
         actions: () => [
             { label: '🏠 Home', icon: '🏠', message: 'Home renovation' },
             { label: '📚 Education', icon: '📚', message: 'Education expenses' },
@@ -102,11 +107,12 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
         ],
     },
 
-    // Loan amount question
+    // Loan amount question (only when AI is asking)
     {
         test: (l) =>
             (l.includes('how much') || l.includes('loan amount') || l.includes('how much would you like to borrow')) &&
-            (l.includes('loan') || l.includes('borrow')),
+            (l.includes('loan') || l.includes('borrow')) &&
+            !l.includes('approved') && !l.includes('disbursed') && !l.includes('credited'),
         actions: () => {
             const sym = getCountryConfig().currency.symbol;
             return [
@@ -118,11 +124,12 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
         },
     },
 
-    // Loan tenure question
+    // Loan tenure question (only when AI is asking)
     {
         test: (l) =>
             (l.includes('tenure') || l.includes('repayment period') || l.includes('how long') || l.includes('duration')) &&
-            (l.includes('loan') || l.includes('month') || l.includes('repay')),
+            (l.includes('loan') || l.includes('month') || l.includes('repay')) &&
+            !l.includes('approved') && !l.includes('disbursed') && !l.includes('credited'),
         actions: () => [
             { label: '6 months', icon: '📅', message: '6 months' },
             { label: '12 months', icon: '📅', message: '12 months' },
@@ -153,13 +160,14 @@ const RESPONSE_PATTERNS: ResponsePattern[] = [
 
     // ─── General Confirmations ─────────────────
 
-    // Accept / Decline loan offer
+    // Accept / Decline loan offer (only when offering, not after approval)
     {
         test: (l) =>
             ((l.includes('accept') && l.includes('offer')) ||
                 (l.includes('would you like to') && (l.includes('accept') || l.includes('proceed'))) ||
                 (l.includes('confirm') && l.includes('loan'))) &&
-            l.includes('?'),
+            l.includes('?') &&
+            !l.includes('approved') && !l.includes('disbursed') && !l.includes('credited'),
         actions: () => [
             { label: '✅ Accept', icon: '✅', message: 'Yes, I accept the loan offer' },
             { label: '❌ Decline', icon: '❌', message: 'No, I want to decline' },

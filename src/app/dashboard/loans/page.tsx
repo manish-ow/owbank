@@ -3,14 +3,16 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/i18n';
 import { useTheme } from '@/theme';
+import countryConfig, { formatCurrency } from '@/config';
 
 export default function LoansPage() {
   const [loans, setLoans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [showApply, setShowApply] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [form, setForm] = useState({
-    amount: '',
+    amount: '5000',
     tenure: '12',
     purpose: '',
     creditScore: 750,
@@ -37,10 +39,15 @@ export default function LoansPage() {
       .finally(() => setLoading(false));
   };
 
-  const applyForLoan = async (e: React.FormEvent) => {
+  const handleLoanSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowConfirm(true);
+  };
+
+  const confirmLoan = async () => {
     setApplying(true);
     setResult(null);
+    setShowConfirm(false);
     try {
       const res = await fetch('/api/loans', {
         method: 'POST',
@@ -56,7 +63,7 @@ export default function LoansPage() {
       setResult(data);
       if (data.success) {
         fetchLoans();
-        setForm({ amount: '', tenure: '12', purpose: '', creditScore: 750 });
+        setForm({ amount: '5000', tenure: '12', purpose: '', creditScore: 750 });
         setShowApply(false);
       }
     } catch (err) {
@@ -103,7 +110,7 @@ export default function LoansPage() {
                   {loan.status}
                 </span>
               </div>
-              <p className="text-2xl font-bold text-gray-800 mb-1">${loan.amount.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-800 mb-1">{formatCurrency(loan.amount)}</p>
               <p className="text-sm text-gray-500 mb-4">{loan.purpose}</p>
 
               <div className="grid grid-cols-3 gap-3">
@@ -117,7 +124,7 @@ export default function LoansPage() {
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
                   <p className="text-xs text-gray-400">{t('loans', 'emi')}</p>
-                  <p className="text-sm font-bold" style={{ color: theme.accentColor }}>${loan.emiAmount}</p>
+                  <p className="text-sm font-bold" style={{ color: theme.accentColor }}>{formatCurrency(loan.emiAmount)}</p>
                 </div>
               </div>
 
@@ -132,14 +139,16 @@ export default function LoansPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('loans', 'loanApplication')}</h3>
 
-          <form onSubmit={applyForLoan} className="space-y-4 max-w-lg">
+          <form onSubmit={handleLoanSubmit} className="space-y-4 max-w-lg">
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-1">{t('loans', 'loanAmount')} ($1,000 - $100,000)</label>
+              <label className="block text-sm font-medium text-gray-600 mb-1">
+                {t('loans', 'loanAmount')} ({formatCurrency(countryConfig.loanSettings.minAmount)} - {formatCurrency(countryConfig.loanSettings.maxAmount)})
+              </label>
               <input
                 type="number"
                 required
-                min="1000"
-                max="100000"
+                min={countryConfig.loanSettings.minAmount}
+                max={countryConfig.loanSettings.maxAmount}
                 value={form.amount}
                 onChange={(e) => {
                   setForm({ ...form, amount: e.target.value });
@@ -211,6 +220,35 @@ export default function LoansPage() {
             </button>
           </form>
 
+          {showConfirm && (
+            <div className="mt-4 p-5 rounded-xl bg-yellow-50 border border-yellow-200">
+              <h4 className="font-semibold text-gray-800 mb-3">Confirm Loan Application</h4>
+              <div className="space-y-2 text-sm text-gray-700 mb-4">
+                <p><strong>Amount:</strong> {formatCurrency(parseFloat(form.amount))}</p>
+                <p><strong>Tenure:</strong> {form.tenure} months</p>
+                <p><strong>Purpose:</strong> {form.purpose}</p>
+                <p><strong>Credit Score:</strong> {form.creditScore}</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={confirmLoan}
+                  disabled={applying}
+                  className="flex-1 py-2 rounded-lg font-semibold disabled:opacity-50"
+                  style={{ backgroundColor: theme.primaryColor, color: theme.textOnPrimary }}
+                >
+                  {applying ? t('common', 'processing') : 'Confirm Application'}
+                </button>
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  disabled={applying}
+                  className="flex-1 py-2 rounded-lg font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
           {result && (
             <div className={`mt-4 p-4 rounded-xl ${result.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
               {result.success ? (
@@ -218,7 +256,7 @@ export default function LoansPage() {
                   <p className="font-medium text-green-700">{result.message}</p>
                   <div className="mt-2 text-sm text-green-600">
                     <p>{t('loans', 'interestRate')}: {result.loan.interestRate}%</p>
-                    <p>{t('loans', 'emi')}: ${result.loan.emiAmount}{t('loans', 'emiPerMonth')}</p>
+                    <p>{t('loans', 'emi')}: {formatCurrency(result.loan.emiAmount)}{t('loans', 'emiPerMonth')}</p>
                     <p>{t('loans', 'creditScore')}: {result.loan.creditScore}</p>
                   </div>
                 </div>

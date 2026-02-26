@@ -185,7 +185,7 @@ export default function OnboardingChat({ onClose, onSuccess }: OnboardingChatPro
                         <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">🤖</div>
                         <div>
                             <p className="font-semibold text-sm" style={{ color: theme.textOnPrimary }}>AI Account Opening</p>
-                            <p className="text-xs opacity-60" style={{ color: theme.textOnPrimary }}>Powered by Gemini 2.0</p>
+                            <p className="text-xs opacity-60" style={{ color: theme.textOnPrimary }}>Powered by AI - Your FinancialCo-pilot</p>
                         </div>
                     </div>
                     <button

@@ -15,6 +15,7 @@ import Account from '@/models/Account';
 import Transaction from '@/models/Transaction';
 import { generateReference } from '@/lib/helpers';
 import { publishTransactionEvent } from '@/lib/kafka';
+import { getCountryConfig } from '@/config';
 import logger from '@/lib/logger';
 
 const log = logger.child({ module: 'transactionsController' });
@@ -97,11 +98,18 @@ export async function transfer(req: NextRequest): Promise<NextResponse> {
                     });
                 } catch (k) { /* ignore */ }
 
-                // 2. Atomic balance update
-                senderAccount.balance -= amount;
-                recipientAccount.balance += amount;
-                await senderAccount.save({ session: dbSession });
-                await recipientAccount.save({ session: dbSession });
+                // 2. Re-fetch accounts within the transaction session for atomic update
+                const sender = await Account.findOne({ accountNumber: senderAccount.accountNumber }).session(dbSession);
+                const recipient = await Account.findOne({ accountNumber: toAccount }).session(dbSession);
+
+                if (!sender || !recipient) {
+                    throw new Error('Account not found in transaction');
+                }
+
+                sender.balance -= amount;
+                recipient.balance += amount;
+                await sender.save({ session: dbSession });
+                await recipient.save({ session: dbSession });
 
                 // 3. Create transaction record
                 const transaction = await Transaction.create([{
@@ -137,11 +145,12 @@ export async function transfer(req: NextRequest): Promise<NextResponse> {
             }
         })();
 
+        const config = getCountryConfig();
         return NextResponse.json({
             success: true,
             status: 'submitted',
             reference,
-            message: `Bank transfer of $${amount.toFixed(2)} to ${toAccount} submitted successfully.`,
+            message: `Bank transfer of ${config.currency.symbol}${amount.toFixed(2)} to ${toAccount} submitted successfully.`,
         });
     } catch (error: unknown) {
         if (error instanceof AuthError) return error.response;

@@ -217,7 +217,7 @@
     "errorPrefix": "Maaf, terjadi kesalahan:",
     "genericError": "Maaf, terjadi kesalahan. Silakan coba lagi.",
     "inputPlaceholder": "Tanya apa saja... saldo, transfer, pinjaman, kartu...",
-    "geminiFlash": "Gemini 2.0 Flash",
+    "geminiFlash": "AI Assistant can make mistakes. Please verify important information",
     "checkBalance": "Cek Saldo",
     "showBalance": "Tampilkan saldo rekening saya",
     "transactions": "Transaksi",

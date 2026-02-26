@@ -208,7 +208,7 @@
   "aiChat": {
     "welcomeMessage": "Hello! I'm your AI banking assistant. I can help you check balances, view transactions, transfer money, apply for credit cards, and process loans. What would you like to do?",
     "assistantName": "OW AI Assistant",
-    "poweredBy": "Powered by Gemini 2.0",
+    "poweredBy": "Powered by AI - Your Financial Co-pilot",
     "agent": "Agent",
     "manager": "Manager",
     "transaction": "Transaction",
@@ -217,7 +217,7 @@
     "errorPrefix": "Sorry, I encountered an error:",
     "genericError": "Sorry, something went wrong. Please try again.",
     "inputPlaceholder": "Ask anything... balance, transfer, loan, card...",
-    "geminiFlash": "Gemini 2.0 Flash",
+    "geminiFlash": "AI Assistant can make mistakes. Please verify important information",
     "checkBalance": "Check Balance",
     "showBalance": "Show my account balance",
     "transactions": "Transactions",
